@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.config.annotation.builders.InMemoryClientDetailsServiceBuilder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -19,12 +20,16 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.endpoint.RedirectResolver;
 import org.springframework.security.oauth2.provider.endpoint.TokenKeyEndpoint;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.*;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import javax.sql.DataSource;
 import java.security.KeyPair;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableAuthorizationServer // 这个注解告诉 Spring 这个应用是 OAuth2 的授权服务器//
@@ -44,6 +49,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private DataSource dataSource;
+
     private final static   String client_id = "client";
 
     private final static   String client_secret = "admin";
@@ -54,49 +62,34 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         return redis;
     }
 
-//    @Bean
-//    public JwtTokenStore tokenStore() {
-//        JwtTokenStore jwtTokenStore =  new JwtTokenStore(jwtAccessTokenConverter());
-//        return  jwtTokenStore;
-//    }
-
-    @Bean
-    public JwtAccessTokenConverter jwtAccessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setSigningKey("hzys");   //  Sets the JWT signing key
-        return jwtAccessTokenConverter;
-    }
 
 //    @Bean
-//    public TokenKeyEndpoint tokenKeyEndpoint() {
-//        return new TokenKeyEndpoint(jwtAccessTokenConverter());
+//    public DefaultAccessTokenConverter defaultAccessTokenConverter() {
+//        DefaultAccessTokenConverter defaultAccessTokenConverter = new DefaultAccessTokenConverter();
+//        return defaultAccessTokenConverter;
 //    }
 
-//    private JwtAccessTokenConverter jwtAccessTokenConverter() {
-//        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-//        jwtAccessTokenConverter.setKeyPair(keyPair());
-//        return jwtAccessTokenConverter;
-//    }
-//
-//    private KeyPair keyPair() {
-//        return new KeyStoreKeyFactory(new ClassPathResource("xxx.jks"), "123456".toCharArray()).getKeyPair("xxx", "123456".toCharArray());
-//    }
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory()
-                .withClient(client_id)
-                .secret(new BCryptPasswordEncoder().encode(client_secret))
-                .authorizedGrantTypes("password", "refresh_token")//允许授权范围
-                .authorizedGrantTypes("authorization_code", "implicit")
-                .authorities("ROLE_ADMIN","ROLE_USER")//客户端可以使用的权限
-                .scopes( "read", "write")
-                //  必须要在该范围内才能转发
+//        clients.jdbc(dataSource);
+        InMemoryClientDetailsServiceBuilder inMemoryClientDetailsServiceBuilder = clients.inMemory();
+        List<String> list = new ArrayList<>(Arrays.asList("", "1"));
+        for (String s: list  ) {
+            inMemoryClientDetailsServiceBuilder
+                    .withClient( (client_id + s).trim() )
+                    .secret(new BCryptPasswordEncoder().encode((client_secret + s).trim()))
+                    .authorizedGrantTypes("password", "refresh_token")//允许授权范围
+                    .authorizedGrantTypes("authorization_code", "implicit")
+                    .authorities("ROLE_ADMIN","ROLE_USER")//客户端可以使用的权限
+                    .scopes( "read", "write")
+                    //  必须要在该范围内才能转发
 //                 .redirectUris("")
-                // 是否跳过授权部分
-                .autoApprove(true)
-                .accessTokenValiditySeconds(60 * 2  * 100)
-                .refreshTokenValiditySeconds(60 * 2 * 100);
+                    // 是否跳过授权部分
+                    .autoApprove(true)
+                    .accessTokenValiditySeconds(60 * 2  * 100)
+                    .refreshTokenValiditySeconds(60 * 2 * 100);
+        }
     }
 
     @Override
@@ -125,7 +118,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 ////                .checkTokenAccess("permitAll()")
 //                .allowFormAuthenticationForClients();//允许表单登录
 //        security.passwordEncoder(passwordEncoder);
-        // 对于CheckEndpoint控制器[框架自带的校验]的/oauth/check端点允许所有客户端发送器请求而不会被Spring-security拦截
+        // 对于CheckEndpoint控制器[框架自带的校验]的/oau而th/check端点允许所有客户端发送器请求不会被Spring-security拦截
         // 开启/oauth/token_key验证端口无权限访问
         // 开启/oauth/check_token验证端口认证权限访问
         security
@@ -137,8 +130,37 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 //        security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()").allowFormAuthenticationForClients();
         security.passwordEncoder(passwordEncoder);
 //        security.realm("oauth2");
-
     }
 //
 
+    //    @Bean
+//    public JwtTokenStore tokenStore() {
+//        JwtTokenStore jwtTokenStore =  new JwtTokenStore(jwtAccessTokenConverter());
+//        return  jwtTokenStore;
+//    }
+
+    @Bean
+    public JwtAccessTokenConverter jwtAccessTokenConverter() {
+        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+        jwtAccessTokenConverter.setSigningKey("hzys");   //  Sets the JWT signing key
+        return jwtAccessTokenConverter;
     }
+
+//    @Bean
+//    public TokenKeyEndpoint tokenKeyEndpoint() {
+//        return new TokenKeyEndpoint(jwtAccessTokenConverter());
+//    }
+
+//    private JwtAccessTokenConverter jwtAccessTokenConverter() {
+//        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+//        jwtAccessTokenConverter.setKeyPair(keyPair());
+//        return jwtAccessTokenConverter;
+//    }
+//
+//    private KeyPair keyPair() {
+//        return new KeyStoreKeyFactory(new ClassPathResource("xxx.jks"), "123456".toCharArray()).getKeyPair("xxx", "123456".toCharArray());
+//    }
+
+
+
+}

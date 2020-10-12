@@ -1,5 +1,6 @@
 package com.hzys.ssoserver.config.sso.hander;
 
+import com.yh.core.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.Charset;
+import java.util.Base64;
+import java.util.Optional;
 
 
 @Component("securityAuthenticationProvider")
@@ -37,8 +44,9 @@ public class SecurityAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication authentication ) throws AuthenticationException {
-
-		System.out.println("**********登录***********");
+		String clientID =  getClientId();
+        System.out.println(" getClientId()" + clientID);
+	    System.out.println("**********登录***********");
         // [1] 获取 username 和 password
 		String userName = (String) authentication.getPrincipal();
         String inputPassword = (String) authentication.getCredentials();
@@ -80,4 +88,19 @@ public class SecurityAuthenticationProvider implements AuthenticationProvider {
 	public boolean supports( Class<?> authentication ) {
 		return authentication.equals(UsernamePasswordAuthenticationToken.class);
 	}
+
+    private  String getClientId(){
+        final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+        final String authorizationHeaderValue = request.getHeader("Authorization");
+        final String base64AuthorizationHeader = Optional.ofNullable(authorizationHeaderValue)
+                .map(headerValue->headerValue.substring("Baber ".length())).orElse("");
+
+        if(StringUtils.isNotEmpty(base64AuthorizationHeader)){
+            String decodedAuthorizationHeader = new String(Base64.getDecoder().decode(base64AuthorizationHeader), Charset.forName("UTF-8"));
+            return decodedAuthorizationHeader.split(":")[0];
+        }
+
+        return "";
+    }
 }

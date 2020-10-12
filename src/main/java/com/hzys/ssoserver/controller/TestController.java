@@ -39,7 +39,7 @@ public class TestController {
     /**
      * *******************开放给SSO客户端使用的接口 *******************
      */
-    @PostMapping("/oauth/sso")
+    @RequestMapping("/oauth/sso")
     @ResponseBody
 //    @ApiOperation(value = "获取登录用户", notes = "SSO客户端使用接口", produces = "application/json")
     public String getSsoUserId(Principal user) {

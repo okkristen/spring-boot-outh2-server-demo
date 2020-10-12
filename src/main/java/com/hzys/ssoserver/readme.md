@@ -61,13 +61,13 @@
 ###根据上两种方式获取token之后的操作方式
 `````` java
 方式一:
-http://localhost:10000/user/oauth/all?access_token=4fc443ca-4a59-4f45-9dad-67ed6c6f9872
+http://localhost:10000/user/oauth/all?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDA5NTA1MjYsInVzZXJfbmFtZSI6ImFkbWluIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9hZG1pbiJdLCJqdGkiOiJkN2JlY2NkYS0zOTViLTQ2YjAtOWU2NC00ZDczMGQzMWNlNjAiLCJjbGllbnRfaWQiOiJjbGllbnQiLCJzY29wZSI6WyJyZWFkIl19.ctIu4bUAhFKo8ThFxfTu_YNr0kdiIOlPQbazh8G6AnE
 方式二:
 http://localhost:10000/user/oauth/all
 请求头中
-hearders:  Authorization:  bearer 4fc443ca-4a59-4f45-9dad-67ed6c6f9872
+hearders:  Authorization:  bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDA5NTA1MjYsInVzZXJfbmFtZSI6ImFkbWluIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9hZG1pbiJdLCJqdGkiOiJkN2JlY2NkYS0zOTViLTQ2YjAtOWU2NC00ZDczMGQzMWNlNjAiLCJjbGllbnRfaWQiOiJjbGllbnQiLCJzY29wZSI6WyJyZWFkIl19.ctIu4bUAhFKo8ThFxfTu_YNr0kdiIOlPQbazh8G6AnE
 其中的bearer ===  上面获取token中的 token_type的值
-其中 4fc443ca-4a59-4f45-9dad-67ed6c6f9872 为  上面获取token中的 access_token的值
+其中 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDA5NTA1MjYsInVzZXJfbmFtZSI6ImFkbWluIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9hZG1pbiJdLCJqdGkiOiJkN2JlY2NkYS0zOTViLTQ2YjAtOWU2NC00ZDczMGQzMWNlNjAiLCJjbGllbnRfaWQiOiJjbGllbnQiLCJzY29wZSI6WyJyZWFkIl19.ctIu4bUAhFKo8ThFxfTu_YNr0kdiIOlPQbazh8G6AnE 为  上面获取token中的 access_token的值
 ``````
 
 
@@ -132,6 +132,8 @@ hearders:  Authorization:  bearer 4fc443ca-4a59-4f45-9dad-67ed6c6f9872
 2. sso配置却无法实现的个性化 比如: client-secret cline-id
 
 ```
+
+
 
 
 
